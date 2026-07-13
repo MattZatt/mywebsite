@@ -20,9 +20,9 @@
         <h1>
            Projects 
         </h1>
-        <h3>
+        <h2>
             Pihole
-        </h3>
+        </h2>
         <p>
             My Passion Started with what most start with... Pihole
         </p>
@@ -34,6 +34,89 @@
             I would add a caveat for anyone looking for a start in the networking world. DO NOT copy verbatium. This is boring but take 
             time to read about it, learn about what you are doing. Are you running this on docker or somewhere else? explain it to yourself
         </p>
+        <h2>
+            Subnetting madness
+        </h2>
+        <p>
+            Subnetting... why? What was it designed for? Why not just make a seperate newtwork for each group of devices? According to my Comptia Network+ N10-009 textbook, by AnThony Sequeira, to paraphrase, "Subnetting is  a way to reduce the broadcast domain for a set of supported devices." 
+            The larger the scope the slower the respose time. Such as in echolocation, or radio waves. 
+        </p>
+        <p>
+            Better said than done. It is easy to say heck even practice that apply. Follow the textbook, write it out, even use tools like cisco packet tracer with a guide to get started.
+            The real fun is to apply this knowledge. For me this was best applied in a home lab but it's a waste if there is nothing to set on said network. 
+            Why not throw a windows AD envvironment into the mix? Show the benifits and isolation created between the two networks? 
+            Think of it as a Work profile and personal profile on your phone. below are a few steps to get started with this.
+        </p>
+        <h2>
+            Plan The Network
+        </h2>
+        <p>
+            Since the home lab environment already exists, I wanted to minimize the impact on the current network. So with that being said, let's look at the current firewall.
+            I plan to move to a new firewall in the future but for now, I am using a Sonicwall TZ series 8 port model. 
+            lets plan to split the network into 4 subnets. much smaller but still reasonable. I also planned on using a class B address with a /26 notation which should help prevent accidental
+            duplicate internal networks with any new hardware introduced in the future and we can restrict to the firewall's spare ports through vlans.
+            While overkill for the AD environment, This will allow testing of unknown devices into said AD, what security best practices can be exploited, and how to guard against them for 
+            production environments.
+        </p>
+        <p>
+            For the AD environments, I wanted to see which version would be best for my needs. checking Microsft's website which I have linked below, I wanted one still receiving updates
+            Server 2025 seemed like the appropriate choice. paired with Azure Arch we can get the hotpatch preview enabled for another layer of redundancy in addition the the HA cluster
+            previously set up with Proxmox. I also wanted to see if I could get a free license for the AD environment. I was able to get a 180 day trial license for the server and a 90 day trial for the client.
+            Once the trial expires, we can move to a paid license but since this is installed in virual environment, we will be utilizing both backups and snapshots to restore the environment to a working state in case of failures.
+            We will also need a few windows 11 clients to add to the domain. Thankfully we can set these up inside proxmox again to minimize hardware requirements. 
+        </p>
+        <h2>
+            Execution
+        </h2>
+        <p>
+            first was wiring up the unused ports to the switch currently in use. Which I have gone with a Cisco Meraki MS225-24P. Again overkill for a home lab but was reasonable in terms of expense
+            gets handson with l2 switching and vlans. Pick a random vlan. document which port from the sonicwall is using which port on the switch and vlan tag. 
+            let's restrict that port on the switch to the set vlan to prevent anything getting out.
+        </p>
+        <p>
+            That's the network part set up. Now for the AD environment. For me this is going to run on a virtual machine running inside Proxmox. Why proxmox?
+            To again, get hands on with a type 1 hypervisor. To practice high availability, restoration, and for centralized management.
+            Thankfully there is documentation on how to get set up and a a virtio driver for the initial install.
+            Now I will admit to a mistake here. Post setup and licensing I had a proxmox node go down. This node stored the DC for the domain and I had negleced a post install backup.
+            It hurt and cost a relicense but is an important lesson. Even if it feels like a waste, create your initial backup post install and license.
+            2 rebuild and wound licking later the environment is set up. has it's own dedicated vlan and NIC. For me I dedicated 1 NIC for the DC and the 1 NIC for both windows 11 clients since I want to 
+            avoid congestion to the DC since this will be the host for the AD environments, handle DNS resolution for theis subnet, and any future services I wish to add in windows.
+            I'll attach a few basic videos and links that helped me set this up.
+        </p>
+        <h2>
+            What next?
+        </h2>
+        <p>
+            Now the network and environment is set up. Let's use it for "production" for me this is dedicating it to a work roll. Handling anything requiring the windows OS and 
+            providing a remote access solution. How do we access this environment? For me I am looking at a vpn solution, which is tailscale for now with the possibility of moving to netbird/ wireguard in the future.
+            Fun piece of infromation. even if the VPN options are different, they are both based on wireguard. So if you learn one, you can learn the other. Why vpn over vlan translation at this stage? ACLs, Offsite access
+            and To keep the work and personal network isolated. we can either install agents
+            on the clients or we can add a dedicated node for full subnet access.
+            Since the VPN solution will technically allow outside access behind the domain's firewall, we want to harden this node as much as possible. For me I went with Alpine linux.
+            A core of most network hardware, website hosting, and has the capability to run with minimal resources. The setup is pretty straightforward but requires some intentional thought.
+            For me I created two seperate nodes both in proxmox to act as out access. 
+            Once set up lets restrict who can access those nodes. Since I am the owner of the tailscale account I set up a second user to limit access with the primary node handling both users
+            but the second node for the admin only as a failback in addition to proxmox's gui which has a 3rd node for me to access in case I am away from the lan.
+            I placed node 3 on an offsite location for now. This requires more hardware but can be done on as little as a raspberry pi.
+        </p>
+        <h1>
+            links:
+            <a href="https://learn.microsoft.com/en-us/windows/release-health/windows-server-release-info">Windows Server Release Info</a>
+
+        </h1>
+        <h1>
+            Hardware:
+                12th gen Intel gaming pc
+                hp Pavilion 510
+                Dell poweredge R630
+                Buffalo Terastation Essentials TS3400R
+                Sonicwall tz470
+                Cisco Meraki MS225-24P
+                1x Raspberry PI 4 (8GB)
+                Cyberpower CP1500PFCLCD
+                CyberPower SL700U
+                12u 4 post open frame server
+        </h1>
         </div>
     </body>
 </html>
