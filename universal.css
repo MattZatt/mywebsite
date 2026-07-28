@@ -279,10 +279,23 @@ pre {
 }
 
 /* Footer */
-footer {
+#footerwrapper{
+    background-color: #2e8d3b;
+}
+#spacemainfooter{
+    padding: 0%;
+    max-width: 600;
+    margin: auto;
+}
+.footer {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: var(--footer-height);
+    line-height: var(--footer-height);
+    color: #045fd6;
     text-align: center;
-    padding: 2rem;
-    color: var(--text-light);
 }
 
 /* Utility Classes */
